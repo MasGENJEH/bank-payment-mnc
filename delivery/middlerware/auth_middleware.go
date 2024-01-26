@@ -4,23 +4,24 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"test-mnc/shared/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthMiddleware interface {
-	RequireToken(roles ...string) gin.HandlerFunc
+	RequireToken() gin.HandlerFunc
 }
 
 type authMiddleware struct {
-	// jwtService service.JwtService
+	jwtService service.JwtService
 }
 
 type AuthHeader struct {
 	AuthorizationHeader string `header:"Authorization"`
 }
 
-func (a *authMiddleware) RequireToken(roles ...string) gin.HandlerFunc {
+func (a *authMiddleware) RequireToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var autHeader AuthHeader
 		if err := ctx.ShouldBindHeader(&autHeader); err != nil {
@@ -44,20 +45,20 @@ func (a *authMiddleware) RequireToken(roles ...string) gin.HandlerFunc {
 		}
 		ctx.Set("user", claims["username"])
 
-		validRole := false
-		// admin, user, other....
-		for _, role := range roles {
-			if role == claims["role"] {
-				validRole = true
-				break
-			}
-		}
+		// validRole := false
+		// // admin, user, other....
+		// for _, role := range roles {
+		// 	if role == claims["role"] {
+		// 		validRole = true
+		// 		break
+		// 	}
+		// }
 
-		if !validRole {
-			log.Printf("RequireToken.validRole\n")
-			ctx.AbortWithStatus(http.StatusForbidden)
-			return
-		}
+		// if !validRole {
+		// 	log.Printf("RequireToken.validRole\n")
+		// 	ctx.AbortWithStatus(http.StatusForbidden)
+		// 	return
+		// }
 
 		ctx.Next()
 	}
