@@ -43,22 +43,8 @@ func (a *authMiddleware) RequireToken() gin.HandlerFunc {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-		ctx.Set("user", claims["username"])
-
-		// validRole := false
-		// // admin, user, other....
-		// for _, role := range roles {
-		// 	if role == claims["role"] {
-		// 		validRole = true
-		// 		break
-		// 	}
-		// }
-
-		// if !validRole {
-		// 	log.Printf("RequireToken.validRole\n")
-		// 	ctx.AbortWithStatus(http.StatusForbidden)
-		// 	return
-		// }
+		
+		ctx.Set("user", claims["userId"])
 
 		ctx.Next()
 	}

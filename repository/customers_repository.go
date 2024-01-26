@@ -5,10 +5,12 @@ import (
 	"log"
 	"test-mnc/config"
 	"test-mnc/entity"
+	"test-mnc/entity/dto"
 )
 
 type CustomerRepository interface {
 	GetCustomersByUsernameForLogin(username, password string) (entity.Customers, error)
+	DeleteToken(user dto.AuthResponseDto) error
 }
 
 type customerRepository struct {
@@ -31,4 +33,9 @@ func (e *customerRepository) GetCustomersByUsernameForLogin(username, password s
 		return entity.Customers{}, err
 	}
 	return customer, nil
+}
+
+func (c *customerRepository) DeleteToken(user dto.AuthResponseDto) error {
+	user.Token = ""
+	return nil
 }

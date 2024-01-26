@@ -27,8 +27,8 @@ func (s *Server) initRoute() {
 	rg := s.engine.Group(config.ApiGroup)
 
 	authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
-	controller.NewAuthController(s.authUsc, rg).Route()
-	controller.NewTransactionsController(s.transactionUC, rg, authMiddleware).Route()
+	controller.NewAuthController(s.authUsc, authMiddleware ,rg).Route()
+	controller.NewTransactionsController(s.transactionUC, authMiddleware ,rg).Route()
 
 }
 

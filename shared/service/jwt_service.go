@@ -14,10 +14,12 @@ import (
 type JwtService interface {
 	CreateToken(user entity.Customers) (dto.AuthResponseDto, error)
 	ParseToken(tokenHeader string) (jwt.MapClaims, error)
+	InvalidateToken(token string) error
 }
 
 type jwtService struct {
 	cfg config.TokenConfig
+	invalidTokens map[string]bool
 }
 
 func (j *jwtService) CreateToken(user entity.Customers) (dto.AuthResponseDto, error) {
@@ -54,6 +56,16 @@ func (j *jwtService) ParseToken(tokenHeader string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
+
+func (j *jwtService) InvalidateToken(token string) error {
+
+	if j.invalidTokens == nil {
+		j.invalidTokens = make(map[string]bool)
+	}
+
+	j.invalidTokens[token] = true
+	return nil
+}
 func NewJwtService(cfg config.TokenConfig) JwtService {
 	return &jwtService{cfg: cfg}
 }

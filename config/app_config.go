@@ -8,4 +8,7 @@ const (
 
 	// Payment
 	Payment = "/payment"
+
+	// Logout
+	AuthLogout = "/logout"
 )

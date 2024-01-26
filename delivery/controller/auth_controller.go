@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"test-mnc/config"
+	"test-mnc/delivery/middleware"
 	"test-mnc/entity/dto"
 	"test-mnc/shared/common"
 	"test-mnc/usecase"
@@ -13,6 +14,7 @@ import (
 type AuthController struct {
 	authUc usecase.AuthUseCase
 	rg *gin.RouterGroup
+	authMiddleware middleware.AuthMiddleware
 }
 
 func (a *AuthController) loginHandler(ctx *gin.Context) {
@@ -29,10 +31,40 @@ func (a *AuthController) loginHandler(ctx *gin.Context) {
 	common.SendCreateResponse(ctx, rsv, "Ok")
 }
 
-func (a *AuthController) Route() {
-	a.rg.POST(config.AuthLogin, a.loginHandler)
+func (a *AuthController) logoutHandler(ctx *gin.Context) {
+	var user dto.AuthResponseDto
+	// if err := ctx.ShouldBindJSON(&user); err != nil {
+	// 	common.SendErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	// 	return
+	// }
+	err := a.authUc.Logout(user) 
+	if err != nil {
+		common.SendErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	common.SendLogoutResponse(ctx, "Logout successful")
 }
 
-func NewAuthController(authUc usecase.AuthUseCase, rg *gin.RouterGroup) *AuthController {
-	return &AuthController{authUc: authUc, rg: rg}
+// func (a *AuthController) logoutHandlers(ctx *gin.Context) {
+// 	// Dapatkan token dari header Authorization
+// 	token := ctx.GetHeader("Authorization")
+
+// 	// Panggil metode Logout dari AuthUseCase
+// 	if err := a.authUc.Logout(token); err != nil {
+// 		common.SendErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
+
+// 	// Kirim respons bahwa logout berhasil
+// 	common.SendLogoutResponse(ctx, "Logout successful")
+// }
+
+func (a *AuthController) Route() {
+	a.rg.POST(config.AuthLogin, a.loginHandler)
+	a.rg.POST(config.AuthLogout, a.authMiddleware.RequireToken(), a.logoutHandler)
+
+}
+
+func NewAuthController(authUc usecase.AuthUseCase, authMiddleware middleware.AuthMiddleware,rg *gin.RouterGroup) *AuthController {
+	return &AuthController{authUc: authUc, rg: rg, authMiddleware: authMiddleware,}
 }

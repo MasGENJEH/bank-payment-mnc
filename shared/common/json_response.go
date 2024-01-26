@@ -17,6 +17,16 @@ func SendCreateResponse(c *gin.Context, data interface{}, message string) {
 	})
 }
 
+func SendLogoutResponse(c *gin.Context, message string) {
+	c.JSON(http.StatusCreated, &model.SingleResponse{
+		Status: model.Status{
+			Code:    http.StatusCreated,
+			Message: message,
+		},
+	})
+}
+
+
 func SendSingleResponse(c *gin.Context, data interface{}, message string) {
 	c.JSON(http.StatusOK, &model.SingleResponse{
 		Status: model.Status{
