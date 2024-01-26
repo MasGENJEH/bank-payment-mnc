@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"test-mnc/config"
 	"test-mnc/delivery/controller"
+	"test-mnc/delivery/middleware"
 	"test-mnc/repository"
 	"test-mnc/shared/service"
 	"test-mnc/usecase"
@@ -15,6 +16,7 @@ import (
 
 type Server struct {
 	customerUC usecase.CustomersUseCase
+	transactionUC usecase.TransactionsUsecase
 	authUsc        usecase.AuthUseCase
 	engine         *gin.Engine
 	jwtService     service.JwtService
@@ -24,9 +26,9 @@ type Server struct {
 func (s *Server) initRoute() {
 	rg := s.engine.Group(config.ApiGroup)
 
-	// authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
+	authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
 	controller.NewAuthController(s.authUsc, rg).Route()
-	// controller.NewCustomerController(s.customerUC, authMiddleware, rg).Route()
+	controller.NewTransactionsController(s.transactionUC, rg, authMiddleware).Route()
 
 }
 
@@ -48,9 +50,11 @@ func NewServer() *Server {
 
 	// Inject DB ke -> repository
 	customerRepo := repository.NewCustomerRepository(db)
+	transactionRepo := repository.NewTransactionsRepository(db)
 
 	// Inject REPO ke -> useCase
 	customerUC := usecase.NewCustomerUseCase(customerRepo)
+	transactionUC := usecase.NewTransactionsUsecase(transactionRepo)
 	jwtService := service.NewJwtService(cfg.TokenConfig)
 	authUc := usecase.NewAuthUseCase(customerUC, jwtService)
 
@@ -59,6 +63,7 @@ func NewServer() *Server {
 
 	return &Server{
 		customerUC: customerUC,
+		transactionUC: transactionUC,
 		authUsc:        authUc,
 		engine:         engine,
 		jwtService:     jwtService,

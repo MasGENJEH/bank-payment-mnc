@@ -8,6 +8,7 @@ import (
 )
 
 type TransactionsRepository interface {
+	Create(payload entity.Transaction) (entity.Transaction, error)
 }
 
 type transactionsRepository struct {
@@ -36,7 +37,11 @@ func (t *transactionsRepository) Create(payload entity.Transaction) (entity.Tran
 		payload.Amount,
 		payload.TransactionType,
 		merchant.Balance,
-		payload.Description).Scan(&transaction.Id, &transaction.Date, &transaction.CreatedAt, &transaction.UpdatedAt)
+		payload.Description).Scan(
+			&transaction.Id, 
+			&transaction.Date,
+			&transaction.CreatedAt, 
+			&transaction.UpdatedAt)
 
 	if err != nil {
 		log.Println("transactionRepository.QueryRow: ", err.Error())
@@ -48,7 +53,7 @@ func (t *transactionsRepository) Create(payload entity.Transaction) (entity.Tran
 	transaction.MerchantId = payload.MerchantId
 	transaction.Amount = payload.Amount
 	transaction.TransactionType = payload.TransactionType
-	transaction.Balance = merchant.Balance
+	transaction.CurrentBalance = merchant.Balance
 	transaction.Description = payload.Description
 
 	return transaction, nil	

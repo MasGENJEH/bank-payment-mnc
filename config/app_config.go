@@ -5,4 +5,7 @@ const (
 
 	// Login
 	AuthLogin = "/login"
+
+	// Payment
+	Payment = "/payment"
 )
