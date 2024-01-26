@@ -20,13 +20,22 @@ func NewTransactionsRepository(db *sql.DB) TransactionsRepository {
 
 func (t *transactionsRepository) Create(payload entity.Transaction) (entity.Transaction, error) {
 	var transaction entity.Transaction
-
-	err := t.db.QueryRow(config.InsertTransaction,
-		payload.CustomersFrom,
-		payload.CustomersTo,
+	var merchant entity.Merchants
+	err := t.db.QueryRow(config.UpdateMerchantBalance, 
+		payload.Amount,
+		payload.MerchantId).Scan(&merchant.Balance)
+	
+	if err != nil {
+		log.Println("updateMerchantBalanceRepository.QueryRow: ", err.Error())
+		return entity.Transaction{}, err
+	}
+		
+	err = t.db.QueryRow(config.InsertTransaction,
+		payload.CustomerId,
+		payload.MerchantId,
 		payload.Amount,
 		payload.TransactionType,
-		payload.Balance,
+		merchant.Balance,
 		payload.Description).Scan(&transaction.Id, &transaction.Date, &transaction.CreatedAt, &transaction.UpdatedAt)
 
 	if err != nil {
@@ -34,11 +43,12 @@ func (t *transactionsRepository) Create(payload entity.Transaction) (entity.Tran
 		return entity.Transaction{}, err
 	}
 
-	transaction.CustomersFrom = payload.CustomersFrom
-	transaction.CustomersTo = payload.CustomersTo
+
+	transaction.CustomerId = payload.CustomerId
+	transaction.MerchantId = payload.MerchantId
 	transaction.Amount = payload.Amount
 	transaction.TransactionType = payload.TransactionType
-	transaction.Balance = payload.Balance
+	transaction.Balance = merchant.Balance
 	transaction.Description = payload.Description
 
 	return transaction, nil	

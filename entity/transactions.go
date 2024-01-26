@@ -4,8 +4,8 @@ import "time"
 
 type Transaction struct {
 	Id              string      `json:"id"`
-	CustomersFrom   []Customers `json:"customers_from"`
-	CustomersTo     string `json:"customers_to"`
+	CustomerId []Customers `json:"customers_id"`
+	MerchantId     string `json:"merchant_id"`
 	Date time.Time `json:"date"`
 	Amount          float64     `json:"amount"`
 	TransactionType string      `json:"transaction_type"`
