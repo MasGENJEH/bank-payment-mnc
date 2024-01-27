@@ -41,6 +41,10 @@ func (j *jwtService) CreateToken(user entity.Customers) (dto.AuthResponseDto, er
 }
 
 func (j *jwtService) ParseToken(tokenHeader string) (jwt.MapClaims, error) {
+	if j.invalidTokens[tokenHeader] {
+		return nil, fmt.Errorf("oops, token has been invalidated")
+	}
+	
 	token, err := jwt.Parse(tokenHeader, func(token *jwt.Token) (interface{}, error) {
 		return j.cfg.JwtSignatureKy, nil
 	})
@@ -56,16 +60,11 @@ func (j *jwtService) ParseToken(tokenHeader string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-
 func (j *jwtService) InvalidateToken(token string) error {
-
-	if j.invalidTokens == nil {
-		j.invalidTokens = make(map[string]bool)
-	}
-
+	// Tandai token sebagai tidak valid (logout)
 	j.invalidTokens[token] = true
 	return nil
 }
 func NewJwtService(cfg config.TokenConfig) JwtService {
-	return &jwtService{cfg: cfg}
+	return &jwtService{cfg: cfg, invalidTokens: make(map[string]bool)}
 }

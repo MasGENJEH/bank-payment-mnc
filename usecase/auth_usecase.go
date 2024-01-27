@@ -8,7 +8,8 @@ import (
 
 type AuthUseCase interface {
 	Login(payload dto.AuthRequestDto) (dto.AuthResponseDto, error)
-	Logout(user dto.AuthResponseDto) error
+	Logout(token string) error
+	
 }
 
 type authUseCase struct {
@@ -30,10 +31,11 @@ func (a *authUseCase) Login(payload dto.AuthRequestDto) (dto.AuthResponseDto, er
 	return token, nil
 }
 
-func (a *authUseCase) Logout(user dto.AuthResponseDto) error{
-	if err := a.userUC.DeleteTokenForLogout(user); err != nil {
+func (a *authUseCase) Logout(token string) error {
+	if err := a.jwtService.InvalidateToken(token); err != nil {
 		return err
 	}
+
 	return nil
 }
 

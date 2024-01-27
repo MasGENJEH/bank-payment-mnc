@@ -32,32 +32,18 @@ func (a *AuthController) loginHandler(ctx *gin.Context) {
 }
 
 func (a *AuthController) logoutHandler(ctx *gin.Context) {
-	var user dto.AuthResponseDto
-	// if err := ctx.ShouldBindJSON(&user); err != nil {
-	// 	common.SendErrorResponse(ctx, http.StatusBadRequest, err.Error())
-	// 	return
-	// }
-	err := a.authUc.Logout(user) 
-	if err != nil {
+	// Dapatkan token dari header Authorization
+	token := ctx.GetHeader("Authorization")
+
+	// Panggil metode Logout dari AuthUseCase
+	if err := a.authUc.Logout(token); err != nil {
 		common.SendErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Kirim respons bahwa logout berhasil
 	common.SendLogoutResponse(ctx, "Logout successful")
 }
-
-// func (a *AuthController) logoutHandlers(ctx *gin.Context) {
-// 	// Dapatkan token dari header Authorization
-// 	token := ctx.GetHeader("Authorization")
-
-// 	// Panggil metode Logout dari AuthUseCase
-// 	if err := a.authUc.Logout(token); err != nil {
-// 		common.SendErrorResponse(ctx, http.StatusInternalServerError, err.Error())
-// 		return
-// 	}
-
-// 	// Kirim respons bahwa logout berhasil
-// 	common.SendLogoutResponse(ctx, "Logout successful")
-// }
 
 func (a *AuthController) Route() {
 	a.rg.POST(config.AuthLogin, a.loginHandler)
